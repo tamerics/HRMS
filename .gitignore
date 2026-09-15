@@ -1,0 +1,27 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and generated files
+node_modules/
+frontend/dist/
+dist/
+build/
+coverage/
+*.log
+
+# Deployment archives and local backups
+*.zip
+*.apk
+*.aab
+*.ipa
+*.bak
+iisnode/
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
