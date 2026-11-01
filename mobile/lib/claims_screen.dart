@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:file_picker/file_picker.dart';
 
 class ClaimsScreen extends StatefulWidget {
   const ClaimsScreen({required this.token, required this.apiBaseUrl, super.key});
@@ -19,6 +20,7 @@ class _ClaimsScreenState extends State<ClaimsScreen> {
   String category = 'Travel';
   DateTime? expenseDate;
   String? attachmentName;
+  String? attachmentData;
   String? message;
   List<dynamic> claims = [];
   bool loading = true;
@@ -55,6 +57,16 @@ class _ClaimsScreenState extends State<ClaimsScreen> {
     if (value != null) setState(() => expenseDate = value);
   }
 
+  Future<void> _pickAttachment() async {
+    final result = await FilePicker.platform.pickFiles(withData: true);
+    final file = result?.files.single;
+    if (file == null) return;
+    setState(() {
+      attachmentName = file.name;
+      attachmentData = file.bytes == null ? null : base64Encode(file.bytes!);
+    });
+  }
+
   Future<void> _submit() async {
     if (expenseDate == null || amount.text.trim().isEmpty) {
       setState(() => message = 'Enter an amount and choose the expense date.');
@@ -76,6 +88,7 @@ class _ClaimsScreenState extends State<ClaimsScreen> {
         'amount': double.tryParse(amount.text.trim()),
         'description': description.text.trim(),
         'attachmentName': attachmentName,
+        'attachmentData': attachmentData,
       }),
     );
     if (!mounted) return;
@@ -112,7 +125,7 @@ class _ClaimsScreenState extends State<ClaimsScreen> {
           TextField(controller: description, maxLines: 3, decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder())),
           const SizedBox(height: 12),
           OutlinedButton.icon(
-            onPressed: () => setState(() => attachmentName = 'receipt-selected'),
+            onPressed: _pickAttachment,
             icon: const Icon(Icons.attach_file),
             label: Text(attachmentName == null ? 'Attach receipt' : 'Receipt attached'),
           ),
