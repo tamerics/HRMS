@@ -60,7 +60,7 @@ class _AuthGateState extends State<AuthGate> {
     }
     return token == null
         ? LoginScreen(onLogin: (value) => setState(() => token = value))
-        : HomeScreen(token: token!, onLogout: _logout);
+        : DashboardScreen(token: token!, onLogout: _logout);
   }
 
   Future<void> _logout() async {
@@ -178,26 +178,93 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({required this.token, required this.onLogout, super.key});
+class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({required this.token, required this.onLogout, super.key});
 
   final String token;
   final VoidCallback onLogout;
 
   @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  Map<String, dynamic>? employee;
+  List<dynamic> attendance = [];
+  String? error;
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboard();
+  }
+
+  Future<void> _loadDashboard() async {
+    try {
+      final headers = {'Authorization': 'Bearer ${widget.token}'};
+      final results = await Future.wait([
+        http.get(Uri.parse('$apiBaseUrl/mobile/bootstrap'), headers: headers),
+        http.get(Uri.parse('$apiBaseUrl/attendance'), headers: headers),
+      ]);
+      if (results.any((response) => response.statusCode >= 400)) {
+        throw Exception('Unable to load your HR workspace');
+      }
+      final bootstrap = jsonDecode(results[0].body) as Map<String, dynamic>;
+      setState(() {
+        employee = bootstrap['employee'] as Map<String, dynamic>?;
+        attendance = jsonDecode(results[1].body) as List<dynamic>;
+        loading = false;
+      });
+    } catch (err) {
+      setState(() {
+        error = err.toString().replaceFirst('Exception: ', '');
+        loading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final name = employee?['name'] ?? 'Employee';
     return Scaffold(
       appBar: AppBar(
         title: const Text('Withinearth HR'),
-        actions: [IconButton(onPressed: onLogout, icon: const Icon(Icons.logout))],
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: const [
-          Text('Welcome to your HR workspace', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          SizedBox(height: 8),
-          Text('Attendance, leave, claims, payroll, and employee services will appear here.'),
+        actions: [
+          IconButton(onPressed: _loadDashboard, icon: const Icon(Icons.refresh)),
+          IconButton(onPressed: widget.onLogout, icon: const Icon(Icons.logout)),
         ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: _loadDashboard,
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            Text('Welcome, $name', style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 20),
+            if (loading) const Center(child: CircularProgressIndicator()),
+            if (error != null) Text(error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            if (!loading && error == null) ...[
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.calendar_today),
+                  title: const Text('Leave balance'),
+                  subtitle: Text('${employee?['leaveBalance']?['annual'] ?? 0} annual days available'),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text('Recent attendance', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 8),
+              if (attendance.isEmpty) const Text('No attendance records found.'),
+              ...attendance.take(10).map((record) => ListTile(
+                leading: const Icon(Icons.access_time),
+                title: Text(record['date']?.toString() ?? 'Unknown date'),
+                subtitle: Text('Status: ${record['status'] ?? 'Unknown'}'),
+                trailing: Text(record['clockIn'] == null ? '—' : 'Clocked in'),
+              )),
+            ],
+          ],
+        ),
       ),
     );
   }
