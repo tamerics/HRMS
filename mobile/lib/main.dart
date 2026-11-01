@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'leave_screen.dart';
 import 'claims_screen.dart';
+import 'payroll_screen.dart';
 
 const apiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
@@ -293,6 +294,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               icon: const Icon(Icons.receipt_long),
               label: const Text('Manage claims'),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => PayrollScreen(token: widget.token, apiBaseUrl: apiBaseUrl),
+                ),
+              ),
+              icon: const Icon(Icons.payments_outlined),
+              label: const Text('View payroll'),
             ),
             const SizedBox(height: 20),
             if (loading) const Center(child: CircularProgressIndicator()),
