@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: withinearth-hr-api
+    runtime: node
+    plan: free
+    buildCommand: cd hrms && npm ci
+    startCommand: cd hrms && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CLIENT_ORIGINS
+        value: https://withinearthhr.com
+      - key: FINGERPRINT_IP
+        sync: false
+      - key: FINGERPRINT_PORT
+        value: "4370"
+      - key: FINGERPRINT_COMM_KEY
+        value: "0"
+      - key: FINGERPRINT_TIMEOUT
+        value: "10000"
+      - key: FINGERPRINT_SYNC_DAYS
+        value: "90"
