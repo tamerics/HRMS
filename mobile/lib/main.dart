@@ -192,7 +192,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Map<String, dynamic>? employee;
   List<dynamic> attendance = [];
   String? error;
+  String? attendanceMessage;
   bool loading = true;
+  bool attendanceSubmitting = false;
 
   @override
   void initState() {
@@ -221,6 +223,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
         error = err.toString().replaceFirst('Exception: ', '');
         loading = false;
       });
+    }
+  }
+
+  Future<void> _clock(String action) async {
+    setState(() {
+      attendanceSubmitting = true;
+      attendanceMessage = null;
+      error = null;
+    });
+    try {
+      final response = await http.post(
+        Uri.parse('$apiBaseUrl/attendance/clock-$action'),
+        headers: {
+          'Authorization': 'Bearer ${widget.token}',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({}),
+      );
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      if (response.statusCode >= 400) {
+        throw Exception(data['error'] ?? 'Attendance action failed');
+      }
+      setState(() => attendanceMessage = action == 'in' ? 'Clocked in successfully.' : 'Clocked out successfully.');
+      await _loadDashboard();
+    } catch (err) {
+      setState(() => error = err.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      if (mounted) setState(() => attendanceSubmitting = false);
     }
   }
 
@@ -253,6 +283,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
               const SizedBox(height: 12),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text('Today’s attendance', style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 12),
+                      if (attendanceMessage != null)
+                        Text(attendanceMessage!, style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: FilledButton.icon(
+                              onPressed: attendanceSubmitting ? null : () => _clock('in'),
+                              icon: const Icon(Icons.login),
+                              label: const Text('Clock in'),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: attendanceSubmitting ? null : () => _clock('out'),
+                              icon: const Icon(Icons.logout),
+                              label: const Text('Clock out'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
               Text('Recent attendance', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
               if (attendance.isEmpty) const Text('No attendance records found.'),
