@@ -17,7 +17,21 @@ const adminSuiteRoutes = require("./routes/admin-suite");
 const mobileRoutes = require("./routes/mobile");
 
 const app = express();
-app.use(cors());
+const allowedOrigins = (process.env.CLIENT_ORIGINS || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Origin is not allowed by CORS"));
+    },
+  })
+);
 app.use(express.json({ limit: "3mb" }));
 
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
