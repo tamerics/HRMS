@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'leave_screen.dart';
+
 const apiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
   defaultValue: 'http://localhost:4000/api',
@@ -271,6 +273,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
           padding: const EdgeInsets.all(20),
           children: [
             Text('Welcome, $name', style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => LeaveScreen(token: widget.token, apiBaseUrl: apiBaseUrl),
+                ),
+              ),
+              icon: const Icon(Icons.event_available),
+              label: const Text('Manage leave'),
+            ),
             const SizedBox(height: 20),
             if (loading) const Center(child: CircularProgressIndicator()),
             if (error != null) Text(error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
