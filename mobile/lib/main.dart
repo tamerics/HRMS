@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'leave_screen.dart';
 import 'claims_screen.dart';
 import 'payroll_screen.dart';
+import 'profile_screen.dart';
 
 const apiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
@@ -195,6 +196,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   Map<String, dynamic>? employee;
   List<dynamic> attendance = [];
+  List<dynamic> announcements = [];
   String? error;
   String? attendanceMessage;
   bool loading = true;
@@ -220,6 +222,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       setState(() {
         employee = bootstrap['employee'] as Map<String, dynamic>?;
         attendance = jsonDecode(results[1].body) as List<dynamic>;
+        announcements = (bootstrap['announcements'] as List<dynamic>?) ?? [];
         loading = false;
       });
     } catch (err) {
@@ -276,6 +279,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Text('Welcome, $name', style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: employee == null ? null : () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => ProfileScreen(employee: employee!)),
+              ),
+              icon: const Icon(Icons.person_outline),
+              label: const Text('My profile'),
+            ),
+            const SizedBox(height: 8),
             FilledButton.icon(
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(
@@ -352,7 +363,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              Text('Recent attendance', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 20),
+              Text('Announcements', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 8),
+              if (announcements.isEmpty) const Text('No announcements available.'),
+              ...announcements.take(5).map((item) => Card(
+                child: ListTile(
+                  leading: const Icon(Icons.campaign_outlined),
+                  title: Text(item['title']?.toString() ?? 'Announcement'),
+                  subtitle: Text(item['body']?.toString() ?? item['message']?.toString() ?? ''),
+                ),
+              )),
+              const SizedBox(height: 20),
+                            Text('Recent attendance', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
               if (attendance.isEmpty) const Text('No attendance records found.'),
               ...attendance.take(10).map((record) => ListTile(
