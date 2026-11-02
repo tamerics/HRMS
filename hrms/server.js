@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/auth");
@@ -36,6 +37,22 @@ app.use(
   })
 );
 app.use(express.json({ limit: "3mb" }));
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+});
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+});
+
+app.use("/api", apiLimiter);
+app.use("/api/auth", authLimiter);
 
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 
