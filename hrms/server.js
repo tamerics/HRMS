@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/auth");
@@ -17,6 +18,8 @@ const adminSuiteRoutes = require("./routes/admin-suite");
 const mobileRoutes = require("./routes/mobile");
 
 const app = express();
+app.set("trust proxy", 1);
+app.use(helmet());
 const allowedOrigins = (process.env.CLIENT_ORIGINS || "http://localhost:5173")
   .split(",")
   .map((origin) => origin.trim())
