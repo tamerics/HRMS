@@ -779,7 +779,7 @@ function MoreScreen({ open, employee, onSignOut }) {
 
 // ---------- App shell ----------
 export default function HRMSApp() {
-  const [apiBase, setApiBase] = useState("/api");
+  const [apiBase, setApiBase] = useState(import.meta.env.VITE_API_URL || "/api");
   const [token, setToken] = useState(null);
   const [employee, setEmployee] = useState(null);
   const [authLoading, setAuthLoading] = useState(false);

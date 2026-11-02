@@ -12,29 +12,31 @@ function signToken(employee) {
 // POST /api/auth/register
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password, role, department } = req.body;
+    const { name, email, password, department } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ error: "name, email, and password are required" });
     }
 
-    const existing = await Employee.findOne({ email: email.toLowerCase() });
+    const normalizedEmail = email.trim().toLowerCase();
+    const existing = await Employee.findOne({ email: normalizedEmail });
     if (existing) {
       return res.status(409).json({ error: "An account with that email already exists" });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
     const employee = await Employee.create({
-      name,
-      email,
+      name: name.trim(),
+      email: normalizedEmail,
       passwordHash,
-      role: role || "Employee",
+      role: "Employee",
       department: department || "General",
     });
 
     const token = signToken(employee);
     res.status(201).json({ token, employee });
   } catch (err) {
-    res.status(500).json({ error: "Registration failed", detail: err.message });
+    console.error("Registration failed:", err);
+    res.status(500).json({ error: "Registration failed" });
   }
 });
 
@@ -46,7 +48,8 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "email and password are required" });
     }
 
-    const employee = await Employee.findOne({ email: email.toLowerCase() });
+    const normalizedEmail = email.trim().toLowerCase();
+    const employee = await Employee.findOne({ email: normalizedEmail });
     if (!employee) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
@@ -59,7 +62,8 @@ router.post("/login", async (req, res) => {
     const token = signToken(employee);
     res.json({ token, employee });
   } catch (err) {
-    res.status(500).json({ error: "Login failed", detail: err.message });
+    console.error("Login failed:", err);
+    res.status(500).json({ error: "Login failed" });
   }
 });
 

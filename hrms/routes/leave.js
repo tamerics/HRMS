@@ -5,10 +5,6 @@ const requireAuth = require("../middleware/auth");
 
 const router = express.Router();
 router.use(requireAuth);
-router.use((req, res, next) => {
-  if (req.method !== "GET") return res.status(409).json({ error: "Submit and approve requests through the new Leave and Excuses page. Historical requests are read-only." });
-  next();
-});
 
 // GET /api/leave — this employee's leave requests, most recent first
 router.get("/", async (req, res) => {
