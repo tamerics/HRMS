@@ -112,7 +112,7 @@ class _ClaimsScreenState extends State<ClaimsScreen> {
         padding: const EdgeInsets.all(20),
         children: [
           DropdownButtonFormField<String>(
-            value: category,
+            initialValue: category,
             decoration: const InputDecoration(labelText: 'Category', border: OutlineInputBorder()),
             items: ['Travel', 'Medical', 'Meals', 'Equipment', 'Other']
                 .map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
