@@ -14,6 +14,50 @@ const apiBaseUrl = String.fromEnvironment(
   defaultValue: 'http://localhost:4000/api',
 );
 
+ThemeData withinearthTheme() {
+  const ink = Color(0xff123b45);
+  const accent = Color(0xffdf5b3f);
+  const canvas = Color(0xfff3f6f2);
+  final scheme = ColorScheme.fromSeed(
+    seedColor: ink,
+    brightness: Brightness.light,
+  ).copyWith(
+    primary: ink,
+    secondary: accent,
+    surface: Colors.white,
+  );
+  return ThemeData(
+    colorScheme: scheme,
+    scaffoldBackgroundColor: canvas,
+    useMaterial3: true,
+    fontFamily: 'Inter',
+    appBarTheme: const AppBarTheme(
+      backgroundColor: canvas,
+      foregroundColor: ink,
+      elevation: 0,
+      centerTitle: false,
+    ),
+    cardTheme: CardThemeData(
+      color: Colors.white,
+      elevation: 0,
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: const Color(0xffe7ece6),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+    ),
+  );
+}
+
 void main() {
   runApp(const WithinearthHrApp());
 }
@@ -25,10 +69,7 @@ class WithinearthHrApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Withinearth HR',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff176b87)),
-        useMaterial3: true,
-      ),
+      theme: withinearthTheme(),
       home: const AuthGate(),
     );
   }
@@ -201,6 +242,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String? attendanceMessage;
   bool loading = true;
   bool attendanceSubmitting = false;
+  int selectedDestination = 0;
 
   @override
   void initState() {
@@ -388,6 +430,54 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: selectedDestination,
+        onDestinationSelected: (index) {
+          setState(() => selectedDestination = index);
+          if (index == 0) return;
+          final destination = switch (index) {
+            1 => LeaveScreen(token: widget.token, apiBaseUrl: apiBaseUrl),
+            2 => ClaimsScreen(token: widget.token, apiBaseUrl: apiBaseUrl),
+            3 => PayrollScreen(token: widget.token, apiBaseUrl: apiBaseUrl),
+            _ => employee == null
+                ? null
+                : ProfileScreen(employee: employee!),
+          };
+          if (destination != null) {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => destination),
+            );
+          }
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.event_outlined),
+            selectedIcon: Icon(Icons.event),
+            label: 'Leave',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.receipt_long_outlined),
+            selectedIcon: Icon(Icons.receipt_long),
+            label: 'Claims',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.payments_outlined),
+            selectedIcon: Icon(Icons.payments),
+            label: 'Payroll',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+      ),
     );
   }
 }
+
