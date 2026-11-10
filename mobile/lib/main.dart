@@ -89,10 +89,17 @@ class _AuthGateState extends State<AuthGate> {
   @override
   void initState() {
     super.initState();
-    SharedPreferences.getInstance().then((prefs) {
+    SharedPreferences.getInstance().timeout(const Duration(seconds: 5)).then((prefs) {
       if (mounted) {
         setState(() {
           token = prefs.getString('auth_token');
+          loading = false;
+        });
+      }
+    }).catchError((_) {
+      if (mounted) {
+        setState(() {
+          token = null;
           loading = false;
         });
       }
