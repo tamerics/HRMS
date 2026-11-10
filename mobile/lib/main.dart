@@ -261,8 +261,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     try {
       final headers = {'Authorization': 'Bearer ${widget.token}'};
       final results = await Future.wait([
-        http.get(Uri.parse('$apiBaseUrl/mobile/bootstrap'), headers: headers),
-        http.get(Uri.parse('$apiBaseUrl/attendance'), headers: headers),
+        http
+            .get(Uri.parse('$apiBaseUrl/mobile/bootstrap'), headers: headers)
+            .timeout(const Duration(seconds: 20)),
+        http
+            .get(Uri.parse('$apiBaseUrl/attendance'), headers: headers)
+            .timeout(const Duration(seconds: 20)),
       ]);
       if (results.any((response) => response.statusCode >= 400)) {
         throw Exception('Unable to load your HR workspace');
