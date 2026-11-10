@@ -4,18 +4,27 @@ Flutter client for Android and iOS.
 
 ## Run locally
 
-Install Flutter, then run:
+From this directory:
 
 ```bash
 flutter pub get
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:4000/api
+flutter create --platforms=android,ios .
+flutter run --dart-define=API_BASE_URL=https://hrms-abgo.onrender.com/api
 ```
 
-Use the deployed API URL for a device or release build:
+For an Android APK connected to the hosted API:
 
 ```bash
-flutter build apk --dart-define=API_BASE_URL=https://api.withinearthhr.com/api
-flutter build ios --dart-define=API_BASE_URL=https://api.withinearthhr.com/api
+flutter build apk --release --dart-define=API_BASE_URL=https://hrms-abgo.onrender.com/api
 ```
 
-The mobile client uses the existing HRMS authentication endpoint and stores the JWT locally.
+The APK is created at
+`build/app/outputs/flutter-apk/app-release.apk`.
+
+For iOS (on macOS with Xcode):
+
+```bash
+flutter build ios --release --dart-define=API_BASE_URL=https://hrms-abgo.onrender.com/api
+```
+
+The mobile client uses the existing HRMS authentication endpoint, stores the JWT locally, and provides dashboard navigation for home, leave, claims, payroll, and profile.
