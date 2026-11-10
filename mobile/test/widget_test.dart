@@ -1,9 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:withinearth_hr/main.dart';
 
 void main() {
   testWidgets('Withinearth HR app renders', (tester) async {
+    SharedPreferences.setMockInitialValues({});
     await tester.pumpWidget(const WithinearthHrApp());
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(WithinearthHrApp), findsOneWidget);
