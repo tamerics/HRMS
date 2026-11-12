@@ -58,8 +58,8 @@ class _ClaimsScreenState extends State<ClaimsScreen> {
   }
 
   Future<void> _pickAttachment() async {
-    final result = await FilePicker.pickFiles(withData: true);
-    final file = result?.files.single;
+    final result = await FilePicker.pickFiles();
+    final file = result.isEmpty ? null : result.first;
     if (file == null) return;
     setState(() {
       attachmentName = file.name;
