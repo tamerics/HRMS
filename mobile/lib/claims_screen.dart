@@ -58,7 +58,7 @@ class _ClaimsScreenState extends State<ClaimsScreen> {
   }
 
   Future<void> _pickAttachment() async {
-    final result = await FilePicker.platform.pickFiles(withData: true);
+    final result = await FilePicker.pickFiles(withData: true);
     final file = result?.files.single;
     if (file == null) return;
     setState(() {
@@ -112,7 +112,7 @@ class _ClaimsScreenState extends State<ClaimsScreen> {
         padding: const EdgeInsets.all(20),
         children: [
           DropdownButtonFormField<String>(
-            initialValue: category,
+            value: category,
             decoration: const InputDecoration(labelText: 'Category', border: OutlineInputBorder()),
             items: ['Travel', 'Medical', 'Meals', 'Equipment', 'Other']
                 .map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
@@ -145,3 +145,4 @@ class _ClaimsScreenState extends State<ClaimsScreen> {
     );
   }
 }
+
