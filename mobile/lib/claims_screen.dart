@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:file_picker/file_picker.dart';
@@ -63,7 +61,7 @@ class _ClaimsScreenState extends State<ClaimsScreen> {
     if (file == null) return;
     setState(() {
       attachmentName = file.name;
-      attachmentData = file.bytes == null ? null : base64Encode(file.bytes!);
+      attachmentData = null;
     });
   }
 
